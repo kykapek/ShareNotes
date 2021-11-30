@@ -1,5 +1,7 @@
 package com.example.sharenotes
 
+import android.content.Context
+import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest.newInstance
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +15,9 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sharenotes.CrimeListFragment.Companion.newInstance
+import java.lang.reflect.Array.newInstance
+import java.net.URLClassLoader.newInstance
 import java.text.DateFormat
 import java.util.*
 
@@ -20,11 +25,26 @@ private const val TAG = "CrimeListFragment"
 
 class CrimeListFragment : Fragment() {
 
+    interface Callbacks {
+        fun onCrimeSelected(crimeId: UUID)
+    }
+
     private lateinit var crimeRecyclerView: RecyclerView
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
+    private var callbacks: Callbacks? = null
 
     private val crimeListViewModel : CrimeListViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
+    }
+
+    override fun onAttach(context: Context) { //прикрепиили фрагмент к активити
+        super.onAttach(context)
+        callbacks = context as Callbacks?
+    }
+
+    override fun onDetach() {  //отвязали фрагмент от активити
+        super.onDetach()
+        callbacks = null
     }
 
     override fun onCreateView(
@@ -59,7 +79,7 @@ class CrimeListFragment : Fragment() {
 
 
 
-    private inner class CrimeHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener{
+    private inner class CrimeHolder(view: View) : RecyclerView.ViewHolder(view), View.OnClickListener {
 
         private lateinit var crime: Crime
 
@@ -78,17 +98,19 @@ class CrimeListFragment : Fragment() {
             }
         }
 
-        init{
+        init {
             itemView.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            Toast.makeText(context, "${crime.title} pressed!", Toast.LENGTH_SHORT).show()
+
+            callbacks?.onCrimeSelected(crime.id)
+
         }
 
     }
 
-    private inner class CrimeAdapter(var crimes: List<Crime>) : RecyclerView.Adapter<CrimeHolder>(){
+    private inner class CrimeAdapter(var crimes: List<Crime>) : RecyclerView.Adapter<CrimeHolder>() {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {  //создание представления на дисплее
             val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)

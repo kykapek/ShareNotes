@@ -16,6 +16,8 @@
         android:textSize="18sp"
         android:textColor="@color/black"
         tools:text="Crime Title"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintEnd_toStartOf="@+id/ivCrimeSolved"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
