@@ -7,6 +7,7 @@ import com.example.sharenotes.Crime
 import com.example.sharenotes.database.CrimeDatabase
 import java.lang.IllegalStateException
 import java.util.*
+import java.util.concurrent.Executors
 
 private const val DATABASE_NAME = "crime-database"
 
@@ -19,6 +20,19 @@ class CrimeRepository private constructor(context: Context) {
     ).build()
 
     private val crimeDAO = database.crimeDAO()
+    private val executor = Executors.newSingleThreadExecutor() //исполнитель, который работает в фоновом потоке
+
+    fun updateCrime(crime: Crime) {
+        executor.execute {  //в фоновый поток
+            crimeDAO.updateCrime(crime)
+        }
+    }
+
+    fun addCrime(crime: Crime) {
+        executor.execute {  //в фоновый поток
+            crimeDAO.addCrime(crime)
+        }
+    }
 
     fun getCrimes(): LiveData<List<Crime>> = crimeDAO.getCrimes()
     fun getCrime(id: UUID): LiveData<Crime?> = crimeDAO.getCrime(id)
