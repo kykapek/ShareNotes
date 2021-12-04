@@ -17,8 +17,10 @@ import java.util.*
 
 private const val ARG_CRIME_ID = "crime_id"
 private const val TAG = "CrimeFragment"
+private const val DIALOG_DATE = "DialogDate"
+private const val REQUEST_DATE = 0
 
-class CrimeFragment : Fragment() {
+class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
 
     private lateinit var crime: Crime
     private lateinit var titleField: EditText
@@ -46,10 +48,6 @@ class CrimeFragment : Fragment() {
         dateButton = view.findViewById(R.id.btnCrimeDate) as Button
         solvedCheckBox = view.findViewById(R.id.checkBoxCrimeSolved) as CheckBox
 
-        dateButton.apply {
-            text = crime.date.toString()
-            isEnabled = false
-        }
         return view
     }
 
@@ -73,6 +71,7 @@ class CrimeFragment : Fragment() {
     private fun updateUI() { //правки пользователя
         titleField.setText(crime.title)  //трабл тут
         dateButton.text = crime.date.toString()
+        Log.i("Date", dateButton.text.toString())
         solvedCheckBox.apply {
             isChecked = crime.isSolved
             jumpDrawablesToCurrentState()
@@ -114,11 +113,24 @@ class CrimeFragment : Fragment() {
                 crime.isSolved = isChecked
             }
         }
+
+        dateButton.setOnClickListener {
+            DatePickerFragment.newInstance(crime.date).apply {  //вызов конструктора фрагмента выбора даты
+                setTargetFragment(this@CrimeFragment, REQUEST_DATE) //назначение целевого фрагмента
+                show(this@CrimeFragment.requireFragmentManager(), DIALOG_DATE)
+            }
+        }
+
     }
 
     override fun onStop() {
         super.onStop()
         crimeDetailViewModel.saveCrime(crime) //сохранить отредактированное
+    }
+
+    override fun onDateSelected(date: Date) {
+        crime.date = date
+        updateUI()
     }
 
     companion object {
