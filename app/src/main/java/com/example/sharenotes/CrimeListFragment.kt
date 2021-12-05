@@ -4,9 +4,7 @@ import android.content.Context
 import android.net.wifi.p2p.nsd.WifiP2pDnsSdServiceRequest.newInstance
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -45,6 +43,29 @@ class CrimeListFragment : Fragment() {
     override fun onDetach() {  //отвязали фрагмент от активити
         super.onDetach()
         callbacks = null
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_list, menu) //передал идентификатор ресурса файла меню
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {  //реакция на выбор команды меню
+        return when (item.itemId) {
+            R.id.new_crime -> {
+                val crime = Crime()  //новый объект Crime
+                crimeListViewModel.addCrime(crime)  //добавил его в БД
+                callbacks?.onCrimeSelected(crime.id)  //сказать активити, что запрошено добавление нового преступления
+                true
+            }
+            else ->
+                return super.onOptionsItemSelected(item)
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true) //вызов onCreateOptionsMenu
     }
 
     override fun onCreateView(
