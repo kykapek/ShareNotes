@@ -8,6 +8,7 @@ import android.view.*
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
@@ -28,8 +29,10 @@ class CrimeListFragment : Fragment() {
     }
 
     private lateinit var crimeRecyclerView: RecyclerView
+    private lateinit var emptyView: TextView
     private var adapter: CrimeAdapter? = CrimeAdapter(emptyList())
     private var callbacks: Callbacks? = null
+
 
     private val crimeListViewModel : CrimeListViewModel by lazy {
         ViewModelProviders.of(this).get(CrimeListViewModel::class.java)
@@ -66,6 +69,7 @@ class CrimeListFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true) //вызов onCreateOptionsMenu
+
     }
 
     override fun onCreateView(
@@ -74,7 +78,9 @@ class CrimeListFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_crime_list, container, false)
+        Log.i( "CrimesSize",adapter?.crimes?.size.toString())
         crimeRecyclerView = view.findViewById(R.id.crime_recycler_view) as RecyclerView
+        //emptyView = view.findViewById(R.id.empty_view)
         crimeRecyclerView.layoutManager = LinearLayoutManager(context) //LayoutManager располагает каждый элемент и следит за прокруткой
         //updateUI()
         crimeRecyclerView.adapter = adapter
@@ -96,6 +102,8 @@ class CrimeListFragment : Fragment() {
                         updateUI(crime)
                     }
                 })
+
+
     }
 
 
@@ -138,6 +146,7 @@ class CrimeListFragment : Fragment() {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {  //создание представления на дисплее
             val view = layoutInflater.inflate(R.layout.list_item_crime, parent, false)
             return CrimeHolder(view)
+
         }
 
         override fun getItemCount() = crimes.size
