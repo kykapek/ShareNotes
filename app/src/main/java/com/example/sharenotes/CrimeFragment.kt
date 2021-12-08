@@ -1,6 +1,10 @@
 package com.example.sharenotes
 
+import android.app.Activity
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.content.pm.ResolveInfo
+import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.Editable
@@ -91,6 +95,28 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
         }
     }
 
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        when {  //получение имени контакта
+            resultCode != Activity.RESULT_OK -> return
+
+            requestCode == REQUEST_CONTACT && data != null -> {
+                val contactUri: Uri? = data.data  //ну типа запрос
+                val queryFields = arrayOf(ContactsContract.Contacts.DISPLAY_NAME) //Указать, для каких полей запрос должен возвращать значекние
+                val cursor = requireActivity().contentResolver.query(contactUri!!, queryFields, null, null, null)
+                cursor?.use {
+                    if(it.count == 0) {
+                        return
+                    }
+                    it.moveToFirst()
+                    val suspect = it.getString(0)
+                    crime.suspect = suspect
+                    crimeDetailViewModel.saveCrime(crime)
+                    suspectButton.text = suspect
+                }
+            }
+        }
+    }
+
     override fun onStart() {
         super.onStart()
 
@@ -154,8 +180,13 @@ class CrimeFragment : Fragment(), DatePickerFragment.Callbacks {
             setOnClickListener {
                 startActivityForResult(pickContactIntent, REQUEST_CONTACT)
             }
+            //pickContactIntent.addCategory(Intent.CATEGORY_HOME) проверка блока кнопки
+            val packageManager: PackageManager = requireActivity().packageManager
+            val resolvedActivity: ResolveInfo? = packageManager.resolveActivity(pickContactIntent, PackageManager.MATCH_DEFAULT_ONLY)  //найти активити с соответствующим интентом
+            if(resolvedActivity == null) {
+                suspectButton.isEnabled = false
+            }
         }
-
 
 
     }
